@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exif Metadata Viewer & Remover</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+    }
+    .container {
+      width: 60%;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      box-shadow: 0 0 10px gray;
+      border-radius: 8px;
+      margin-top: 30px;
+    }
+    pre {
+      text-align: left;
+      background: #000;
+      color: lime;
+      padding: 10px;
+      height: 300px;
+      overflow: auto;
+    }
+    button {
+      padding: 10px;
+      margin: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Image Metadata Viewer & Remover</h2>
+
+    <input type="file" id="imageInput" accept="image/*"><br><br>
+
+    <button onclick="viewMetadata()">View Metadata</button>
+    <button onclick="removeMetadata()">Remove Metadata</button>
+
+    <h3>Metadata Output:</h3>
+    <pre id="output">Upload an image and click "View Metadata"</pre>
+  </div>
+
+<script>
+const BASE_URL = "http://localhost:3000";
+
+async function viewMetadata() {
+  const file = document.getElementById("imageInput").files[0];
+  if (!file) {
+    alert("Please select an image first");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  document.getElementById("output").innerText = "Processing...";
+
+  const res = await fetch(BASE_URL + "/metadata", {
+    method: "POST",
+    body: formData
+  });
+
+  const text = await res.text();
+  document.getElementById("output").innerText = text;
+}
+
+async function removeMetadata() {
+  const file = document.getElementById("imageInput").files[0];
+  if (!file) {
+    alert("Please select an image first");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(BASE_URL + "/remove", {
+    method: "POST",
+    body: formData
+  });
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "cleaned_image.jpg";
+  a.click();
+}
+</script>
+
+</body>
+</html>
